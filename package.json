@@ -11,15 +11,18 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.12",
     "@yudiel/react-qr-scanner": "^2.2.1",
+    "html5-qrcode": "^2.3.8",
     "next": "15.2.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-select": "^5.10.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.0.12",
-    "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/node": "20.17.24",
+    "@types/react": "19.0.10",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.24",
@@ -27,6 +30,6 @@
     "eslint-config-next": "15.2.1",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "5.8.2"
   }
 }
