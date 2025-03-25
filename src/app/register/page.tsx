@@ -29,7 +29,7 @@ const EventCreationPage = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData((prev) => ({ ...prev, flyer: e.target.files[0] }));
+      setFormData((prev) => ({ ...prev, flyer: e.target.files![0] }));
     }
   };
 
@@ -42,9 +42,40 @@ const EventCreationPage = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting event:", formData);
+    const store_id = 1;
+    const form = new FormData();
+    form.append("eventName", formData.eventName)
+    // if (formData.flyer) {
+    //   form.append("flyer", formData.flyer);
+    // }
+    // チラシのアップロードは一旦保留
+    form.append("startDate", formData.startDate);
+    form.append("endDate", formData.endDate);
+    form.append("startTime", formData.startTime);
+    form.append("endTime", formData.endTime);
+    form.append("description", formData.description);
+    formData.tags.forEach((tag) => form.append("tags[]", tag));
+    form.append("timestamp", new Date().toISOString());
+    form.append("store_id", store_id.toString());
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/event-register`, {
+        method: 'POST',
+        body: form,
+      });
+      if (!res.ok)throw new Error("送信に失敗しました");
+
+      const result = await res.json();
+      alert(result.message);
+    } catch(err){
+      console.error("Error:",err);
+      alert("送信に失敗しました")
+    }
+
+
+    console.log("Submitting event:", form);
   };
 
   const tagOptions = ["スポーツ", "文化・歴史", "グルメ", "エンタメ", "学び・体験", "社会貢献", "ライフスタイル"];

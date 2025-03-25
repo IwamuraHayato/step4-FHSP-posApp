@@ -9,41 +9,76 @@ const Page = () => {
   const [inputPoints, setInputPoints] = useState<number>(0);
   const [resultMessage, setResultMessage] = useState<string>("");
   const [scanning, setScanning] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const dummyData: Record<string, { name: string; points: number }> = {
-    user123: { name: "山田 太郎", points: 500 },
-    user456: { name: "佐藤 花子", points: 300 },
-  };
 
-  const handleScan = (decodedText: string) => {
+  // const dummyData: Record<string, { name: string; points: number }> = {
+  //   user123: { name: "山田 太郎", points: 500 },
+  //   user456: { name: "佐藤 花子", points: 300 },
+  // };
+
+  const handleScan = async (decodedText: string) => {
     setScanning(false);
-    if (dummyData[decodedText]) {
-      setCustomerName(dummyData[decodedText].name);
-      setCustomerPoints(dummyData[decodedText].points);
-      setResultMessage("");
-    } else {
-      setResultMessage("無効なQRコードです。");
+    setUserId(decodedText); 
+  
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/${decodedText}`);
+      if (!res.ok) throw new Error("顧客が見つかりません");
+  
+      const data = await res.json();
+      setCustomerName(data.name);
+      setCustomerPoints(data.points);
+      setResultMessage(""); // 成功したらメッセージ消す
+    } catch (error) {
+      console.error(error);
+      setResultMessage("無効なQRコード、または顧客が見つかりません。");
+      setCustomerName("");
+      setCustomerPoints(null);
     }
   };
-
+  
   const handleError = (errorMessage: unknown) => {
     console.error(errorMessage);
     setScanning(false);
   };
 
-  const handleTransaction = (type: "add" | "subtract") => {
-    if (customerPoints === null) {
+  const handleTransaction = async (type: "earn" | "use") => {
+    if (!userId || customerPoints === null) {
       setResultMessage("顧客情報がありません。");
       return;
     }
-    if (type === "subtract" && inputPoints > customerPoints) {
+  
+    if (type === "use" && inputPoints > customerPoints) {
       setResultMessage("ポイントが不足しています。");
       return;
     }
-    const newPoints =
-      type === "add" ? customerPoints + inputPoints : customerPoints - inputPoints;
-    setCustomerPoints(newPoints);
-    setResultMessage(`${inputPoints} ポイントを${type === "add" ? "加算" : "減算"}しました。`);
+  
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/points/transaction`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          point: inputPoints,
+          type, // "earn" or "use"
+          store_id: 1, // ← 仮で固定、必要に応じて変数化
+        }),
+      });
+  
+      if (!res.ok) throw new Error("送信失敗");
+  
+      const data = await res.json();
+      const newPoints = type === "earn"
+        ? customerPoints + inputPoints
+        : customerPoints - inputPoints;
+      setCustomerPoints(newPoints);
+      setResultMessage(data.message || `${inputPoints} ポイントを${type === "earn" ? "加算" : "減算"}しました。`);
+    } catch (err) {
+      console.error(err);
+      setResultMessage("ポイント操作に失敗しました。");
+    }
   };
 
   return (
@@ -51,15 +86,16 @@ const Page = () => {
       {scanning && (
          <div className="w-[320px] h-[320px] border-gray-500 flex items-center justify-center">
         <Scanner
-          onScan={(result: string | null) => {
+          onScan={(codes) => {
+            const result = codes[0]?.rawValue; // ← QRのテキスト取得
             if (result) {
               handleScan(result);
             }
           }}
           onError={handleError}
           constraints={{ facingMode: "environment" }}
-          className="w-full h-full"
-        />
+          // classNames="w-full h-full"
+          />
        </div>
       )}
 
@@ -67,8 +103,8 @@ const Page = () => {
       <input type="text" className="w-full p-2 border my-2 text-center" value={customerPoints ?? ""} readOnly placeholder="保有ポイント表示" />
       <input type="number" className="w-full p-2 border my-2 text-center" value={inputPoints} onChange={(e) => setInputPoints(Number(e.target.value))} placeholder="加算 or 減算ポイント入力欄" />
       <div className="flex w-full gap-2">
-        <button className="flex-1 bg-green-500 text-white p-2 rounded-lg" onClick={() => handleTransaction("add")}>+</button>
-        <button className="flex-1 bg-red-500 text-white p-2 rounded-lg" onClick={() => handleTransaction("subtract")}>-</button>
+        <button className="flex-1 bg-green-500 text-white p-2 rounded-lg" onClick={() => handleTransaction("earn")}>+</button>
+        <button className="flex-1 bg-red-500 text-white p-2 rounded-lg" onClick={() => handleTransaction("use")}>-</button>
       </div>
       <input type="text" className="w-full p-2 border my-2 text-center" value={resultMessage} readOnly placeholder="処理結果表示" />
         <button
