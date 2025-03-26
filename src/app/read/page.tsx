@@ -66,6 +66,13 @@ const Page = () => {
           store_id: 1, // ← 仮で固定、必要に応じて変数化
         }),
       });
+      
+      console.log({
+        user_id: userId,
+        store_id: 1,
+        point: inputPoints,
+        type
+      });
   
       if (!res.ok) throw new Error("送信失敗");
   
