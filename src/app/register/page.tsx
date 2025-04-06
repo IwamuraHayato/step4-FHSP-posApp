@@ -202,6 +202,16 @@ const EventCreationPage = () => {
         <button type="submit" style={{ display: 'block', margin: '20px auto', padding: '10px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' , width: '330px'}}>
           登録
         </button>
+        {message && (
+          <div className="mt-4 p-2 bg-green-100 border border-green-300 rounded text-green-700">
+            {message}
+          </div>
+        )}
+        {isSubmitting && (
+          <div className="mt-4 text-center">
+            <p className="text-blue-500">送信中...</p>
+          </div>
+        )}
       </form>
     </div>
   );
