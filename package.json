@@ -12,7 +12,7 @@
     "@tailwindcss/vite": "^4.0.12",
     "@yudiel/react-qr-scanner": "^2.2.1",
     "html5-qrcode": "^2.3.8",
-    "next": "15.2.1",
+    "next": "^14.1.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
