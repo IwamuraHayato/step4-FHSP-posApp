@@ -115,6 +115,7 @@ const EventCreationPage = () => {
       if (!res.ok)throw new Error("送信に失敗しました");
 
       const result = await res.json();
+      console.log("API Response:", result);
       setMessage(result.message || "イベントが登録されました");
       alert(result.message);
 
