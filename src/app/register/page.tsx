@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const EventCreationPage = () => {
   const [formData, setFormData] = useState<{
@@ -30,6 +30,21 @@ const EventCreationPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [availableTags, setAvailableTags] = useState<{ tag_id: number, tag_name: string }[]>([]);
+
+  useEffect(()=> {
+    const fetchTags = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/tags`);
+        const data = await res.json();
+        console.log(data);
+        setAvailableTags(data);
+      } catch (err) {
+        console.error("タグの取得に失敗しました", err);
+      }
+    };
+    fetchTags();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -187,17 +202,19 @@ const EventCreationPage = () => {
 
         <label className="block mb-2">タグ:</label>
         <div className="flex flex-wrap gap-2">
-          {tagOptions.map((tag) => (
+          {availableTags.map((tag) => (
             <button
               type="button"
-              key={tag}
-              className={`p-2 border rounded ${formData.tags.includes(tag) ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-              onClick={() => handleTagChange(tag)}
+              key={tag.tag_id}
+              className={`p-2 border rounded ${
+                formData.tags.includes(String(tag.tag_id)) ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => handleTagChange(String(tag.tag_id))}
             >
-                {tag}
-              </button>
-            ))}
-          </div>
+              {tag.tag_name}
+            </button>
+          ))}
+        </div>
 
         <button type="submit" style={{ display: 'block', margin: '20px auto', padding: '10px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' , width: '330px'}}>
           登録
