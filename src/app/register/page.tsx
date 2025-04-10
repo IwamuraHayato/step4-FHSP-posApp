@@ -109,12 +109,34 @@ const EventCreationPage = () => {
       submitData.append("timestamp", new Date().toISOString());
       submitData.append("store_id", formData.store_id.toString());
 
+      console.log("送信データ:", {
+        eventName: formData.eventName,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        tags: formData.tags,
+        store_id: formData.store_id
+      });
+
+      // タイムアウト設定付きのフェッチ
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒タイムアウト      
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/event-register`, {
         method: 'POST',
         body: submitData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+
+      // レスポンスのログ出力
+      console.log("Response status:", res.status);
       
-      if (!res.ok)throw new Error("送信に失敗しました");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("API error response:", errorText);
+        throw new Error(`送信に失敗しました (${res.status}): ${errorText}`);
+      }
 
       const result = await res.json();
       console.log("API Response:", result);
@@ -135,7 +157,6 @@ const EventCreationPage = () => {
         store_id: 1,
       });
 
-
     } catch(err){
       console.error("Error:",err);
       alert("送信に失敗しました")
@@ -145,8 +166,6 @@ const EventCreationPage = () => {
 
     console.log("Submitting event:", formData);
   };
-
-  const tagOptions = ["スポーツ", "文化・歴史", "グルメ", "エンタメ", "学び・体験", "社会貢献", "ライフスタイル"];
 
   return (
     <div className="max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
