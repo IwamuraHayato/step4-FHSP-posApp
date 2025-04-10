@@ -103,7 +103,9 @@ const EventCreationPage = () => {
       submitData.append("endTime", formData.endTime);
       submitData.append("description", formData.description);
       submitData.append("information", formData.information);
-      formData.tags.forEach((tag) => submitData.append("tags[]", tag));
+      formData.tags.forEach((tag) => {
+        submitData.append("tags", tag);
+      });
       submitData.append("timestamp", new Date().toISOString());
       submitData.append("store_id", formData.store_id.toString());
 
