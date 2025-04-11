@@ -119,7 +119,7 @@ const EventCreationPage = () => {
 
       // タイムアウト設定付きのフェッチ
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒タイムアウト      
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // 30秒タイムアウト      
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/event-register`, {
         method: 'POST',
@@ -219,7 +219,7 @@ const EventCreationPage = () => {
         <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full p-2 border rounded mb-2" required />
 
         <label className="block mb-2">Happy Smile Point インフォメーション:</label>
-        <textarea name="information" value={formData.information} onChange={handleInputChange} placeholder="特別なお知らせを入力してください。" className="w-full p-2 border rounded mb-2" required />
+        <textarea name="information" value={formData.information} onChange={handleInputChange} placeholder="特別なお知らせを入力してください。" className="w-full p-2 border rounded mb-2" />
 
 
         <label className="block mb-2">タグ:</label>
