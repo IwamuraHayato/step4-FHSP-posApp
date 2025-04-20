@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 const EventCreationPage = () => {
   const [formData, setFormData] = useState<{
     eventName: string;
+    area: string; 
     flyer: File | null;
     eventImage: File | null;
     startDate: string;
@@ -16,6 +17,7 @@ const EventCreationPage = () => {
     store_id: number; 
   }>({
     eventName: "",
+    area: "",
     flyer: null,
     eventImage: null, 
     startDate: "",
@@ -27,6 +29,25 @@ const EventCreationPage = () => {
     tags: [],
     store_id: 1, // デフォルト値
   });
+
+  const cityOptions = [
+    "福岡市", "北九州市", "大牟田市", "久留米市", "直方市", "飯塚市", "田川市", "柳川市",
+    "八女市", "筑後市", "大川市", "行橋市", "豊前市", "中間市", "小郡市", "筑紫野市", "春日市",
+    "大野城市", "宗像市", "太宰府市", "古賀市", "福津市", "うきは市", "宮若市", "嘉麻市", "朝倉市",
+    "みやま市", "糸島市", "那珂川市",
+    "宇美町", "篠栗町", "志免町", "須恵町", "新宮町", "久山町", "粕屋町",
+    "芦屋町", "水巻町", "岡垣町", "遠賀町",
+    "小竹町", "鞍手町",
+    "桂川町",
+    "筑前町", "東峰村",
+    "大刀洗町",
+    "大木町",
+    "広川町",
+    "香春町", "添田町", "糸田町", "川崎町", "大任町", "赤村", "福智町",
+    "苅田町", "みやこ町",
+    "吉富町", "上毛町", "築上町"
+  ];
+  
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -46,7 +67,9 @@ const EventCreationPage = () => {
     fetchTags();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -101,6 +124,7 @@ const EventCreationPage = () => {
       submitData.append("endDate", formData.endDate);
       submitData.append("startTime", formData.startTime);
       submitData.append("endTime", formData.endTime);
+      submitData.append("area", formData.area);
       submitData.append("description", formData.description);
       submitData.append("information", formData.information);
       formData.tags.forEach((tag) => {
@@ -145,6 +169,7 @@ const EventCreationPage = () => {
 
       setFormData({
         eventName: "",
+        area: "",
         flyer: null,
         eventImage: null,
         startDate: "",
@@ -172,7 +197,10 @@ const EventCreationPage = () => {
 
       <form onSubmit={handleSubmit}>
         <label className="block mb-2">イベント名:</label>
-        <input type="text" name="eventName" value={formData.eventName} onChange={handleInputChange} className="w-full p-2 border rounded mb-2" required />
+        <input type="text" name="eventName" value={formData.eventName} onChange={handleInputChange} className="w-full p-2 border rounded mb-2" required maxLength={19} />
+        {formData.eventName.length > 19 && (
+          <p className="text-red-500 text-sm mt-1">イベント名は19文字以内で入力してください。</p>
+        )}
 
         <label className="block mb-2">チラシアップロード (PDF/画像):</label>
         <div className="mb-2">
@@ -183,8 +211,15 @@ const EventCreationPage = () => {
             className="w-full p-2 border rounded" 
           />
           {formData.flyer && (
-            <div className="mt-1 text-sm text-green-600">
-              選択済み: {formData.flyer.name}
+            <div className="mt-1 text-sm text-green-600 flex items-center justify-between">
+              <span>選択済み: {formData.flyer.name}</span>
+              <button
+                type="button"
+                className="ml-2 text-red-500 hover:underline"
+                onClick={() => setFormData((prev) => ({ ...prev, flyer: null }))}
+              >
+                削除
+              </button>
             </div>
           )}
         </div>
@@ -198,8 +233,15 @@ const EventCreationPage = () => {
             className="w-full p-2 border rounded" 
           />
           {formData.eventImage && (
-            <div className="mt-1 text-sm text-green-600">
-              選択済み: {formData.eventImage.name}
+            <div className="mt-1 text-sm text-green-600 flex items-center justify-between">
+              <span>選択済み: {formData.eventImage.name}</span>
+              <button
+                type="button"
+                className="ml-2 text-red-500 hover:underline"
+                onClick={() => setFormData((prev) => ({ ...prev, eventImage: null }))}
+              >
+                削除
+              </button>
             </div>
           )}
         </div>
@@ -214,6 +256,20 @@ const EventCreationPage = () => {
 
         <label className="block mb-2">終了時間:</label>
         <input type="time" name="endTime" value={formData.endTime} onChange={handleInputChange} className="w-full p-2 border rounded mb-2" required />
+
+        <label className="block mb-2">開催エリア（市町村）:</label>
+        <select
+          name="area"
+          value={formData.area}
+          onChange={handleInputChange}
+          className="w-full p-2 border rounded mb-2"
+          required
+        >
+          <option value="">選択してください</option>
+          {cityOptions.map((city) => (
+            <option key={city} value={city}>{city}</option>
+          ))}
+        </select>
 
         <label className="block mb-2">イベント紹介:</label>
         <textarea name="description" value={formData.description} onChange={handleInputChange} className="w-full p-2 border rounded mb-2" required />
